@@ -186,4 +186,4 @@ client.on("interactionCreate", async interaction => {
 		}
 });
 
-client.login(process.env.token);
+client.login(process.env.token); // if you dont use replit change it to something else just use gpt if you dont know how to!
