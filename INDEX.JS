@@ -4,7 +4,7 @@ const {
 		Client, GatewayIntentBits, Partials,
 		ActionRowBuilder, ButtonBuilder, ButtonStyle,
 		SlashCommandBuilder, EmbedBuilder,
-		PermissionsBitField
+		PermissionsBitField, MessageFlags
 } = require("discord.js");
 
 const client = new Client({
@@ -86,12 +86,12 @@ client.on("interactionCreate", async interaction => {
 
 		if (commandName === "queue") {
 				if (!member.roles.cache.has(QUEUE_ROLE_ID))
-						return interaction.reply({ content: "You do not have the required role.", ephemeral: true });
+						return interaction.reply({ content: "You do not have the required role.", flags: MessageFlags.Ephemeral });
 
 				if (!testerID) testerID = member.id;
 
 				const channel = guild.channels.cache.get(QUEUE_CHANNEL_ID);
-				if (!channel) return interaction.reply({ content: "Queue channel not found.", ephemeral: true });
+				if (!channel) return interaction.reply({ content: "Queue channel not found.", flags: MessageFlags.Ephemeral });
 
 				const embed = createQueueEmbed();
 				const row = new ActionRowBuilder().addComponents(
@@ -105,14 +105,14 @@ client.on("interactionCreate", async interaction => {
 						await queueMessage.edit({ embeds: [embed], components: [row] });
 				}
 
-				await interaction.reply({ content: "Queue is active!", ephemeral: true });
+				await interaction.reply({ content: "Queue is active!", flags: MessageFlags.Ephemeral });
 		}
 
 		else if (commandName === "stopqueue") {
 				if (!member.permissions.has(PermissionsBitField.Flags.Administrator))
-						return interaction.reply({ content: "You do not have permissions.", ephemeral: true });
+						return interaction.reply({ content: "You do not have permissions.", flags: MessageFlags.Ephemeral });
 
-				await interaction.reply({ content: "Queue stopped.", ephemeral: true });
+				await interaction.reply({ content: "Queue stopped.", flags: MessageFlags.Ephemeral });
 
 				usersInQueue = [];
 				testerID = null;
@@ -126,16 +126,16 @@ client.on("interactionCreate", async interaction => {
 
 		else if (commandName === "remove") {
 				if (!member.permissions.has(PermissionsBitField.Flags.Administrator))
-						return interaction.reply({ content: "You do not have permissions.", ephemeral: true });
+						return interaction.reply({ content: "You do not have permissions.", flags: MessageFlags.Ephemeral });
 
 				let user = interaction.options.getString("user").replace(/\D/g, "");
-				if (!usersInQueue.includes(user)) return interaction.reply({ content: "User is not in queue.", ephemeral: true });
+				if (!usersInQueue.includes(user)) return interaction.reply({ content: "User is not in queue.", flags: MessageFlags.Ephemeral });
 
 				usersInQueue = usersInQueue.filter(u => u !== user);
 				if (queueMessage) await queueMessage.edit({ embeds: [createQueueEmbed()] });
 				await updateTop1Channel(guild);
 
-				return interaction.followUp({ content: "User removed.", ephemeral: true });
+				return interaction.followUp({ content: "User removed.", flags: MessageFlags.Ephemeral });
 		}
 
 		else if (commandName === "result") {
@@ -167,22 +167,22 @@ client.on("interactionCreate", async interaction => {
 		if (!interaction.isButton()) return;
 
 		if (interaction.customId === "joinQueue") {
-				if (interaction.user.id === testerID) return interaction.reply({ content: "Tester cannot join the queue.", ephemeral: true });
-				if (usersInQueue.includes(interaction.user.id)) return interaction.reply({ content: "You are already in queue!", ephemeral: true });
+				if (interaction.user.id === testerID) return interaction.reply({ content: "Tester cannot join the queue.", flags: MessageFlags.Ephemeral });
+				if (usersInQueue.includes(interaction.user.id)) return interaction.reply({ content: "You are already in queue!", flags: MessageFlags.Ephemeral });
 
 				usersInQueue.push(interaction.user.id);
 				if (queueMessage) await queueMessage.edit({ embeds: [createQueueEmbed()] });
 				await updateTop1Channel(interaction.guild);
-				return interaction.reply({ content: "You joined the queue!", ephemeral: true });
+				return interaction.reply({ content: "You joined the queue!", flags: MessageFlags.Ephemeral });
 		}
 
 		else if (interaction.customId === "leaveQueue") {
-				if (!usersInQueue.includes(interaction.user.id)) return interaction.reply({ content: "You are not in queue!", ephemeral: true });
+				if (!usersInQueue.includes(interaction.user.id)) return interaction.reply({ content: "You are not in queue!", flags: MessageFlags.Ephemeral });
 
 				usersInQueue = usersInQueue.filter(u => u !== interaction.user.id);
 				if (queueMessage) await queueMessage.edit({ embeds: [createQueueEmbed()] });
 				await updateTop1Channel(interaction.guild);
-				return interaction.reply({ content: "You left the queue.", ephemeral: true });
+				return interaction.reply({ content: "You left the queue.", flags: MessageFlags.Ephemeral });
 		}
 });
 
